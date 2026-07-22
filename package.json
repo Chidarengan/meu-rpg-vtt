@@ -11,6 +11,7 @@
     "bundle": "node bundle-ai.js"
   },
   "dependencies": {
+    "emoji-picker-react": "^4.19.1",
     "lucide-react": "^1.25.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"

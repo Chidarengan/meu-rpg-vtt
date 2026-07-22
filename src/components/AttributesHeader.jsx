@@ -1,4 +1,3 @@
-import React from 'react';
 import { Settings, Lock, Unlock, Plus, X, Undo, Redo } from 'lucide-react';
 
 export default function AttributesHeader({
@@ -40,7 +39,7 @@ export default function AttributesHeader({
   };
 
   const addResource = () => {
-    const updated = [...sheetData.resources, { id: `res_${Date.now()}`, label: 'Novo Recurso', type: 'number', value: '100', max: '100', color: 'bg-green-500' }];
+    const updated = [...sheetData.resources, { id: `res_${Date.now()}`, label: 'Novo Recurso', type: 'number', value: '0', max: '5', color: 'bg-green-500' }];
     updateSheetData({ ...sheetData, resources: updated });
   };
 
@@ -59,7 +58,7 @@ export default function AttributesHeader({
 
   return (
     <header className="p-3 shrink-0 flex flex-col gap-2 border-b shadow-lg z-20" style={{ backgroundColor: activeTheme.panel, borderColor: activeTheme.border }}>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center w-full">
         <div className="flex items-center gap-2">
           <span className="text-slate-500 text-xs font-mono font-bold uppercase">Nome:</span>
           {isSheetUnlocked ? (
@@ -73,27 +72,40 @@ export default function AttributesHeader({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           {isSheetUnlocked && (
-            <div className="flex bg-black/30 rounded border p-0.5" style={{ borderColor: activeTheme.border }}>
+            <div className="flex bg-black/30 rounded border p-0.5 transition-all" style={{ borderColor: activeTheme.border }}>
               <button onClick={undo} disabled={historyStack.length === 0} className={`p-1 rounded ${historyStack.length === 0 ? 'text-slate-600 cursor-not-allowed' : 'text-slate-300 hover:bg-white/10'}`} title="Desfazer (Ctrl+Z)"><Undo size={14}/></button>
               <button onClick={redo} disabled={redoStack.length === 0} className={`p-1 rounded ${redoStack.length === 0 ? 'text-slate-600 cursor-not-allowed' : 'text-slate-300 hover:bg-white/10'}`} title="Refazer (Ctrl+Y)"><Redo size={14}/></button>
             </div>
           )}
 
-          <button 
-            onClick={() => setIsSheetUnlocked(!isSheetUnlocked)} 
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold border transition-all ${isSheetUnlocked ? 'bg-red-950/40 border-red-500/80 text-red-300' : 'bg-slate-800/80 border-slate-600 text-slate-300 hover:bg-slate-700'}`}
-          >
-            {isSheetUnlocked ? <Unlock size={14} className="animate-pulse" /> : <Lock size={14} />}
-            {isSheetUnlocked ? "DESTRAVADO / EDITAR" : "FICHA TRAVADA"}
-          </button>
+          {isSheetUnlocked && (
+            <button 
+              onClick={() => setShowConfig(!showConfig)}
+              className="p-1.5 rounded border transition-all shadow-sm"
+              style={{
+                /* O botão agora é um camaleão, fundindo-se perfeitamente com a paleta atual */
+                backgroundColor: showConfig ? activeTheme.border : 'transparent',
+                borderColor: activeTheme.border,
+                color: showConfig ? '#ffffff' : '#94a3b8'
+              }}
+              title="Configurações da Ficha"
+            >
+              <Settings size={16} />
+            </button>
+          )}
 
           <button 
-            onClick={() => setShowConfig(!showConfig)}
-            className={`p-1.5 rounded border transition-colors ${showConfig ? 'bg-blue-900/50 border-blue-500 text-blue-300' : 'bg-slate-800 border-slate-600 text-slate-400 hover:text-white'}`}
+            onClick={() => {
+              const novoEstado = !isSheetUnlocked;
+              setIsSheetUnlocked(novoEstado);
+              if (!novoEstado) setShowConfig(false);
+            }} 
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold border transition-all w-36 justify-center ${isSheetUnlocked ? 'bg-red-950/40 border-red-500/80 text-red-300' : 'bg-slate-800/80 border-slate-600 text-slate-300 hover:bg-slate-700'}`}
           >
-            <Settings size={16} />
+            {isSheetUnlocked ? <Lock size={14} className="animate-pulse" /> : <Unlock size={14} />}
+            {isSheetUnlocked ? "TRAVAR FICHA" : "DESTRAVAR FICHA"}
           </button>
         </div>
       </div>

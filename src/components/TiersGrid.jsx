@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Trash2, ArrowDownAZ, GripVertical } from 'lucide-react';
 
 export default function TiersGrid({
@@ -86,7 +86,7 @@ export default function TiersGrid({
   const removeTier = (tierName) => {
     const hasSkills = sheetData.skills.some(s => s.tier === tierName);
     if (hasSkills) {
-      alert("Segurança: Você não pode deletar uma linha que contém habilidades. Remova as habilidades primeiro!");
+      alert("Remova as habilidades primeiro!");
       return;
     }
     const updated = sheetData.tiers.filter(t => t !== tierName);
@@ -111,7 +111,11 @@ export default function TiersGrid({
             onDrop={(e) => handleDropTier(e, tier)}
           >
             <div className="flex items-center gap-2 mb-2 border-b border-white/5 pb-1 select-none">
-              {isSheetUnlocked && <GripVertical size={13} className="text-slate-600 cursor-grab active:cursor-grabbing" />}
+              {/* Espaço reservado fixo para evitar trepidação quando trava/destrava */}
+              <div className="w-4 flex items-center justify-center shrink-0">
+                {isSheetUnlocked && <GripVertical size={13} className="text-slate-600 cursor-grab active:cursor-grabbing" />}
+              </div>
+              
               <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{tier}</span>
               <span className="text-[10px] text-slate-600 font-mono">({tierSkills.length})</span>
               
@@ -120,16 +124,13 @@ export default function TiersGrid({
                   <button 
                     onClick={() => toggleSortTier(tier)} 
                     className={`p-1 rounded transition-colors ${isSorted ? 'bg-yellow-500/20 text-yellow-400' : 'text-slate-500 hover:text-slate-300'}`}
-                    title={isSorted ? "Visualização A-Z (Clique para ver ordem arrastada)" : "Ordenar A-Z"}
                   >
                     <ArrowDownAZ size={14}/>
                   </button>
-                  
                   <button 
                     onClick={() => removeTier(tier)}
                     disabled={tierSkills.length > 0}
                     className={`p-1 rounded ${tierSkills.length === 0 ? 'text-red-500 hover:bg-red-500/20' : 'text-slate-700 cursor-not-allowed'}`}
-                    title={tierSkills.length === 0 ? "Excluir Linha" : "Esvazie a linha primeiro"}
                   >
                     <Trash2 size={14}/>
                   </button>
@@ -141,6 +142,7 @@ export default function TiersGrid({
               {tierSkills.map(skill => {
                 const isPinned = pinnedSkill?.id === skill.id;
                 const isHovered = hoveredSkill?.id === skill.id && !isPinned;
+                const isCustomImage = skill.icon && skill.icon.startsWith('data:image');
 
                 return (
                   <button
@@ -153,13 +155,16 @@ export default function TiersGrid({
                     onMouseLeave={() => setHoveredSkill(null)}
                     onClick={() => togglePin(skill)}
                     className={`
-                      relative w-11 h-11 flex items-center justify-center rounded transition-all duration-100 border-2
+                      relative w-11 h-11 flex items-center justify-center rounded transition-all duration-100 border-2 overflow-hidden
                       ${isPinned ? 'border-yellow-400 scale-110 z-10 shadow-[0_0_10px_rgba(250,204,21,0.5)] bg-slate-900' : `${skill.color} bg-black/40`}
                       ${isHovered ? 'border-white brightness-125 z-10 bg-slate-900' : ''}
-                      ${isSheetUnlocked ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
                     `}
                   >
-                    <span className="relative z-10 text-xl pointer-events-none">{skill.icon || '✨'}</span>
+                    {isCustomImage ? (
+                      <img src={skill.icon} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="relative z-10 text-xl pointer-events-none">{skill.icon || '✨'}</span>
+                    )}
                     {isPinned && <div className="absolute top-0 right-0 w-2 h-2 bg-yellow-400 rounded-full -mt-1 -mr-1 shadow-md"></div>}
                   </button>
                 );
@@ -168,7 +173,7 @@ export default function TiersGrid({
               {isSheetUnlocked && (
                 <button 
                   onClick={() => createSkill(tier)}
-                  className="w-11 h-11 border-2 border-dashed bg-black/20 text-slate-500 hover:text-slate-300 rounded hover:border-slate-400 flex items-center justify-center transition-all"
+                  className="w-11 h-11 border-2 border-dashed bg-black/20 text-slate-500 hover:text-slate-300 rounded flex items-center justify-center transition-all"
                   style={{ borderColor: activeTheme.border }}
                 >
                   <Plus size={18} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import AttributesHeader from './components/AttributesHeader';
 import TiersGrid from './components/TiersGrid';
 import RightPanel from './components/RightPanel';
@@ -25,12 +25,28 @@ const INITIAL_RESOURCES = [
   { id: 'effort_d12', label: 'Effort d12', type: 'boxes', value: 4, max: 8, color: 'bg-purple-600' }
 ];
 
+// O "Tesouro" das 20 Paletas de Cores!
 const THEMES = [
-  { id: 'default', name: 'Trevas (Padrão)', bg: '#070714', panel: '#0a0a1a', border: '#2a2a4a' },
-  { id: 'blood', name: 'Sangue Demoníaco', bg: '#140505', panel: '#1c0a0a', border: '#4c1d1d' },
-  { id: 'necro', name: 'Necromante', bg: '#0f0514', panel: '#180a1f', border: '#3b1d4c' },
-  { id: 'arcane', name: 'Arcano', bg: '#051014', panel: '#0a1a1f', border: '#1d3e4c' },
-  { id: 'noir', name: 'Noir', bg: '#0b0b0b', panel: '#141414', border: '#2a2a2a' }
+  { id: 'default', name: 'Trevas', bg: '#121224', panel: '#1a1a30', border: '#3d3d63' },
+  { id: 'blood', name: 'Sangue Demoníaco', bg: '#1f0a0a', panel: '#2e1212', border: '#6b2929' },
+  { id: 'necro', name: 'Necromante', bg: '#1b0b24', panel: '#281333', border: '#5a2e73' },
+  { id: 'arcane', name: 'Arcano', bg: '#0b1a21', panel: '#142933', border: '#2e5b6e' },
+  { id: 'noir', name: 'Noir', bg: '#171717', panel: '#242424', border: '#404040' },
+  { id: 'cyberpunk', name: 'Neon Cyber', bg: '#0f172a', panel: '#1e293b', border: '#f43f5e' },
+  { id: 'emerald', name: 'Clã Esmeralda', bg: '#064e3b', panel: '#065f46', border: '#10b981' },
+  { id: 'amber', name: 'Deserto de Âmbar', bg: '#451a03', panel: '#78350f', border: '#f59e0b' },
+  { id: 'ocean', name: 'Abismo Oceânico', bg: '#082f49', panel: '#0c4a6e', border: '#0ea5e9' },
+  { id: 'toxic', name: 'Pântano Tóxico', bg: '#14532d', panel: '#166534', border: '#84cc16' },
+  { id: 'gold', name: 'Reino Dourado', bg: '#422006', panel: '#713f12', border: '#eab308' },
+  { id: 'frost', name: 'Gelo Eterno', bg: '#083344', panel: '#164e63', border: '#06b6d4' },
+  { id: 'crimson', name: 'Carmim Real', bg: '#4c0519', panel: '#881337', border: '#e11d48' },
+  { id: 'royal', name: 'Realeza', bg: '#2e1065', panel: '#4c1d95', border: '#8b5cf6' },
+  { id: 'hollow', name: 'Vazio Absoluto', bg: '#000000', panel: '#0a0a0a', border: '#262626' },
+  { id: 'earth', name: 'Terra Ancestral', bg: '#291c14', panel: '#4a3325', border: '#8b5a2b' },
+  { id: 'twilight', name: 'Crepúsculo', bg: '#1e1b4b', panel: '#312e81', border: '#6366f1' },
+  { id: 'ash', name: 'Cinzas de Guerra', bg: '#27272a', panel: '#3f3f46', border: '#a1a1aa' },
+  { id: 'solar', name: 'Chama Solar', bg: '#7f1d1d', panel: '#991b1b', border: '#f97316' },
+  { id: 'abyssal', name: 'Corrupção', bg: '#111827', panel: '#1f2937', border: '#14b8a6' }
 ];
 
 export default function App() {
@@ -38,7 +54,9 @@ export default function App() {
     try {
       const saved = window.localStorage.getItem('rpg_sheet_master_v5');
       if (saved) return JSON.parse(saved);
-    } catch (e) {}
+    } catch {
+      console.log("Criando nova ficha.");
+    }
     return {
       characterName: 'Robert (Summer) Jones',
       attributes: INITIAL_ATTRIBUTES,
@@ -88,10 +106,20 @@ export default function App() {
   const activeTheme = THEMES.find(t => t.id === sheetData.activeThemeId) || THEMES[0];
   const displaySkill = pinnedSkill || hoveredSkill;
 
+  // Lógica aprimorada: Agora ela "derruba" as Configurações se você clicar em uma magia!
   const togglePin = (skill) => {
     if (isEditingSkill) return;
+
+    // Se a aba de configuração estiver aberta, o clique na skill muda a aba instantaneamente
+    if (showConfig) {
+      setShowConfig(false);
+      setPinnedSkill(skill);
+      setHoveredSkill(null);
+      return;
+    }
+
     if (pinnedSkill?.id === skill.id) setPinnedSkill(null);
-    else { setPinnedSkill(skill); setHoveredSkill(null); setShowConfig(false); }
+    else { setPinnedSkill(skill); setHoveredSkill(null); }
   };
 
   const startEditingSkill = () => {
@@ -129,7 +157,7 @@ export default function App() {
     setPinnedSkill(newSkill);
     setEditForm(newSkill);
     setIsEditingSkill(true);
-    setShowConfig(false);
+    setShowConfig(false); // Já fecha config por padrão
   };
 
   const deleteSkill = (id) => {
